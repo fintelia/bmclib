@@ -39,15 +39,20 @@ func (c *Client) SetVirtualMedia(ctx context.Context, kind string, mediaUrl stri
 		for _, media := range virtualMedia {
 			for _, t := range media.MediaTypes {
 				if t == mediaKind {
-					if len(mediaUrl) == 0 {
+					if media.Inserted {
 						err = media.EjectMedia()
-					} else {
-						err = media.InsertMedia(mediaUrl, true, true)
+						if err != nil {
+							return false, err
+						}
 					}
-					if err != nil {
-						return false, err
+					if mediaUrl != "" {
+						err = media.InsertMedia(mediaUrl, true, true)
+						if err != nil {
+							return false, err
+						}
 					}
 					setMedia = true
+					break
 				}
 			}
 		}
