@@ -228,6 +228,13 @@ func (c *Client) SetBootDevice(ctx context.Context, bootDevice string, setPersis
 	return ok, err
 }
 
+// SetVirtualMedia pass through to library functino
+func (c *Client) SetVirtualMedia(ctx context.Context, kind string, mediaUrl string) (ok bool, err error) {
+	ok, metadata, err := bmc.SetVirtualMediaFromInterfaces(ctx, kind, mediaUrl, c.Registry.GetDriverInterfaces())
+	c.setMetadata(metadata)
+	return ok, err
+}
+
 // ResetBMC pass through to library function
 func (c *Client) ResetBMC(ctx context.Context, resetType string) (ok bool, err error) {
 	ok, metadata, err := bmc.ResetBMCFromInterfaces(ctx, resetType, c.Registry.GetDriverInterfaces())
