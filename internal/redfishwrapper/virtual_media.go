@@ -29,37 +29,45 @@ func (c *Client) SetVirtualMedia(ctx context.Context, kind string, mediaUrl stri
 		return false, errors.New("invalid media type")
 	}
 
-	setMedia := false
 	for _, manager := range managers {
 		virtualMedia, err := manager.VirtualMedia()
 		if err != nil {
 			return false, err
 		}
-
 		for _, media := range virtualMedia {
-			for _, t := range media.MediaTypes {
-				if t == mediaKind {
-					if media.Inserted {
-						err = media.EjectMedia()
-						if err != nil {
-							return false, err
-						}
-					}
-					if mediaUrl != "" {
-						err = media.InsertMedia(mediaUrl, true, true)
-						if err != nil {
-							return false, err
-						}
-					}
-					setMedia = true
-					break
+			if media.Inserted {
+				err = media.EjectMedia()
+				if err != nil {
+					return false, err
 				}
 			}
 		}
 	}
 
-	if !setMedia {
-		return false, fmt.Errorf("media kind %s not supported", kind)
+	if mediaUrl != "" {
+		setMedia := false
+		for _, manager := range managers {
+			virtualMedia, err := manager.VirtualMedia()
+			if err != nil {
+				return false, err
+			}
+
+			for _, media := range virtualMedia {
+				for _, t := range media.MediaTypes {
+					if t == mediaKind {
+						err = media.InsertMedia(mediaUrl, true, true)
+						if err != nil {
+							return false, err
+						}
+						setMedia = true
+						break
+					}
+				}
+			}
+		}
+		if !setMedia {
+			return false, fmt.Errorf("media kind %s not supported", kind)
+		}
 	}
 
 	return true, nil
